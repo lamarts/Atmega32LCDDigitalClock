@@ -2,7 +2,7 @@
  * ****************************************************************************************************************
  * Atmega32LCDDigitalClock.c
  * (1) This program demonstrates the use of the HD74480 LCD with an Atmega32 8-bit microcontroller
- * (2)This program utilizes the LCD in 4-bit mode - to set, reset (buttons) and display time in minutes, hours and seconds
+ * (2) This program utilizes the LCD in 4-bit mode - to set, reset (buttons) and display time in minutes, hours and seconds
  * (3) program utilizes the Timer interrupt feature in the Atmega32 microcontroller
  * The interrupt timer onboard the chip was used to generate the 1-second timer using the internal clock set @ 4MHz
  *
@@ -38,27 +38,21 @@
 #define TIME_PIND			PIND
 
 
-#define RegisterSel		PINA0     // Pin for Port A
-#define ReadWrite			PINA1	    // Pin for Port A
-#define Enable				PINA2	    // Pin for Port A
-#define SETHOUR				PIND3     // Pin for Port D
-#define SETMINUTE			PIND4     // Pin for Port D
+#define RegisterSel			PINA0     // Pin for Port A
+#define ReadWrite			PINA1	  // Pin for Port A
+#define Enable				PINA2	  // Pin for Port A
+#define SETHOUR				PIND4     // Pin for Port D
+#define SETMINUTE			PIND5     // Pin for Port D
 
 
 // LCD Instructions - Can be used for MACROS...but I did not use these in this code...just lazy
-#define LCD_Clear			    0x01
-#define LCD_Home			    0x02
-#define LCD_EntryMode			0x06
-#define LCD_DisplayOff		Ox08
+#define LCD_Clear			0x01
+#define LCD_DisplayOff			Ox08
 #define LCD_DisplayOn			Ox0C
-#define LCD_FunctReset		0x30
-#define LCD_FunctSet4bit	0x28
+#define LCD_FunctSet4bit		0x28
 #define LCD_SetCursor			0x80
-
-#define LCDMaxLines			  2
-#define LCDMaxCharacters	16
-#define LCDLineOne			  0x80
-#define LCDLineTwo			  0xC0
+#define LCDLineOne			0x80
+#define LCDLineTwo			0xC0
 
 
 ISR(TIMER1_COMPA_vect);			// Timer Interrupt
@@ -66,7 +60,7 @@ ISR(TIMER1_COMPA_vect);			// Timer Interrupt
 // Global variables
 static volatile int HOU = 00;		// Initial Hour
 static volatile int MIN = 00;		// Initial Minute
-static volatile int SEC = 00;   // Initial Second
+static volatile int SEC = 00;   	// Initial Second
 
 char displaySec[2];
 char displayMin[2];
@@ -74,14 +68,14 @@ char displayHou[2];
 
 // Function Prototypes
 // LCD Control functions
-void LCD_Init(void);				              // Initializes the LCD
+void LCD_Init(void);				// Initializes the LCD
 void LCD_SendCommand(unsigned char cmd);	// Sends command to the LCD
 void LCD_SendData(unsigned char data);		// Sends data to the LCD
-void LCD_SendString(char *string);		    // Sends string to the	LCD
-void LCD_CustomCharacters(void);		      // Sends customized characters to the LCD
-void LCD_DisplayTime();				            // Display time
-void LCD_SetTime(void);				            // Set time
-void LCD_EnterTime(void);			            // Complete adjusting time - changes display from "Set Time"
+void LCD_SendString(char *string);		// Sends string to the	LCD
+void LCD_CustomCharacters(void);		// Sends customized characters to the LCD
+void LCD_DisplayTime();				// Display time
+void LCD_SetTime(void);				// Set time
+void LCD_EnterTime(void);			// Complete adjusting time - changes display from "Set Time"
 
 // To be used for UART to PC communication - not used in this version of program
 void UART_Transmit(unsigned char sendData);	
@@ -220,16 +214,16 @@ void LCD_SetTime()
 	// Start Digital Clock 
 	if(bit_is_clear(PINB, 0))
 	{
-		TCCR1B = (1<<CS12|1<<WGM12);		// Clock source is now set after setting time
+		TCCR1B = (1<<CS12|1<<WGM12);		// Clock source is now set...once desired hours and minutes are set
 		LCD_SendCommand(0x80);
 		LCD_SendString("Time:           ");	// LCD info on first line
-		LCD_SendCommand(0xC0+10);		        // LCD info on second line 10 digits to the right
-		LCD_CustomCharacters();			        // Added smiley face on the second line
+		LCD_SendCommand(0xC0+10);		// LCD info on second line 10 digits to the right
+		LCD_CustomCharacters();			// Added smiley face on the second line
 	}
 
 }
 
-ISR(TIMER1_COMPA_vect)					// Timer Interrupt on Table 18
+ISR(TIMER1_COMPA_vect)					// Timer Interrupt on Table 18 from datasheet
 {
 	if(SEC<60)
 	{
